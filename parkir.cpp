@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <cctype>  // Untuk validasi digit (isdigit)
+#include <algorithm>
 
 using namespace std;
 
@@ -20,12 +21,12 @@ bool cek_format_waktu(string waktu) {
     if (waktu[2] != ':') return false;
 
     // 2. Validasi Digit: Memastikan jam dan menit hanya berisi angka
-    if (!isdigit(waktu[0]) || !isdigit(waktu[1]) || 
+    if (!isdigit(waktu[0]) || !isdigit(waktu[1]) ||
         !isdigit(waktu[3]) || !isdigit(waktu[4])) {
         return false;
     }
 
-    // 3. Validasi Logika Waktu: Konversi ke int untuk cek apakah waktu yang diberikan masuk akal 
+    // 3. Validasi Logika Waktu: Konversi ke int untuk cek apakah waktu yang diberikan masuk akal
     // penggunaan stoi() dan substr(): untuk string waktu = "12:59"
     // waktu.substr(0, 2) -> Ambil 2 karakter mulai index 0 ("12")
     // stoi(...)          -> Ubah string "12" menjadi angka 12
@@ -45,17 +46,24 @@ DataParkir ambil_input() {
 
     cout << "=== PROGRAM PARKIR ===" << endl;
 
-    // Loop input Jenis Kendaraan (Case Sensitive: Mobil/Motor)
+    // Loop input Jenis Kendaraan (case-insensitive: mobil/motor)
     do {
         cout << "Input Jenis (Mobil/Motor) : ";
         cin >> d.jenis;
-        if (d.jenis == "Mobil" || d.jenis == "Motor") {
+        // normalize input ke lowercase untuk perbadingan
+        string jenis_lower = d.jenis;
+        transform(jenis_lower.begin(), jenis_lower.end(), jenis_lower.begin(),
+                  [](unsigned char c){ return static_cast<char>(tolower(c)); });
+        if (jenis_lower == "mobil" || jenis_lower == "motor") {
+            // simpan bentuk kapital di awal untuk output
+            d.jenis = (jenis_lower == "mobil") ? "Mobil" : "Motor";
             valid = true;
         } else {
-            cout << "  [!] Salah! Masukkan 'Mobil' atau 'Motor' (Perhatikan huruf besar)." << endl;
+            cout << "  [!] Salah! Masukkan 'Mobil' atau 'Motor' (Boleh huruf besar/kecil)." << endl;
             valid = false;
         }
     } while (!valid);
+
 
     // Loop input Waktu Masuk (Format HH:MM)
     do {
@@ -101,7 +109,7 @@ int hitung_lama_parkir(string masuk, string keluar) {
     int durasi = total_keluar - total_masuk;
 
     // Jika durasi negatif, berarti melewati tengah malam (+24 jam atau 1440 menit)
-    if (durasi < 0) durasi += 1440; 
+    if (durasi < 0) durasi += 1440;
 
     return durasi;
 }
@@ -116,9 +124,9 @@ int hitung_biaya(string jenis, int lama_menit) {
     // Setup tarif dasar
     if (jenis == "Mobil") {
         tarif_awal = 4000; tarif_berikutnya = 2000; tarif_maksimal = 15000;
-    } else { 
+    } else {
         tarif_awal = 2000; tarif_berikutnya = 1000; tarif_maksimal = 5000;
-    } 
+    }
 
     // Logika perhitungan
     if (lama_menit <= 60) {
@@ -127,14 +135,14 @@ int hitung_biaya(string jenis, int lama_menit) {
         // Pembulatan ke atas: 61 menit dianggap 2 jam (bener gk ya logikanya?)
         int jam_tagihan = lama_menit / 60;
         if (lama_menit % 60 > 0) jam_tagihan++;
-        
+
         // Rumus: Tarif Jam 1 + (Sisa Jam * Tarif Berikutnya)
         biaya = tarif_awal + ((jam_tagihan - 1) * tarif_berikutnya);
     }
-    
+
     // Capping biaya jika melebihi batas maksimal
     if (biaya > tarif_maksimal) biaya = tarif_maksimal;
-    
+
     return biaya;
 }
 
@@ -161,13 +169,13 @@ void print_nota(DataParkir d, int lama_menit, int biaya) {
 int main() {
     // 1. Ambil data (sudah tervalidasi)
     DataParkir tiket = ambil_input();
-    
+
     // 2. Proses perhitungan logika
     int durasi = hitung_lama_parkir(tiket.masuk, tiket.keluar);
     int total_biaya = hitung_biaya(tiket.jenis, durasi);
-    
+
     // 3. Tampilkan hasil akhir
     print_nota(tiket, durasi, total_biaya);
-    
+
     return 0;
 }

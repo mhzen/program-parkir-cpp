@@ -118,7 +118,7 @@ int hitung_lama_parkir(string masuk, string keluar) {
 // Menghitung biaya berdasarkan jenis kendaraan, durasi, dan aturan pembulatan jam.
 // Menerapkan batas maksimal tarif.
 int hitung_biaya(string jenis, int lama_menit) {
-    int biaya = 0; // anu
+    int biaya = 0;
     int tarif_awal, tarif_berikutnya, tarif_maksimal;
 
     // Setup tarif dasar
@@ -132,7 +132,7 @@ int hitung_biaya(string jenis, int lama_menit) {
     if (lama_menit <= 60) {
         biaya = tarif_awal;
     } else {
-        // Pembulatan ke atas: 61 menit dianggap 2 jam (bener gk ya logikanya?)
+        // Pembulatan ke atas: 61 menit dianggap 2 jam
         int jam_tagihan = lama_menit / 60;
         if (lama_menit % 60 > 0) jam_tagihan++;
 
